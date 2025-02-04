@@ -3,7 +3,6 @@ Input = require("libraries/boipushy/Input")
 LevelScene = Object:extend()
 
 local _CAMERA_SIZE = 7
-local _CAMERA_CENTER = {x = 1 + _CAMERA_SIZE, y = 1 + _CAMERA_SIZE}
 
 function LevelScene:new(level)
 
@@ -12,8 +11,7 @@ function LevelScene:new(level)
   self.levelData = LevelData(level)
   self:bindInput()
 
-  self.camera = Camera{width=_CAMERA_SIZE, height=_CAMERA_SIZE, center=_CAMERA_CENTER}
-
+  self.camera = Camera{width=_CAMERA_SIZE, height=_CAMERA_SIZE, levelData=self.levelData}
   self.main_canvas = love.graphics.newCanvas(gw, gh)
 end
 
@@ -58,7 +56,7 @@ function LevelScene:update(dt)
   
   if playerInput then
     self.levelData:handlePlayerInput(playerInput)
-    self.camera:update(self.levelData)
+    self.camera:updateView(self.levelData)
   end
 end
 

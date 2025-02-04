@@ -1,3 +1,5 @@
+Math = require("utils/math")
+
 Camera = Object:extend()
 
 
@@ -13,15 +15,12 @@ _TILE_SIZE = 16 -- Sprites are 16x16 pixels
 function Camera:new(args)
     if type(args.width) ~= "number" then error("no width") end
     if type(args.height) ~= "number" then error("no height") end
-    if type(args.center) ~= "table" then error("no center") end
+    if type(args.levelData) ~= "table" then error("no levelData") end
 
     self.width = args.width
     self.height = args.height
-    self.center = args.center
-end
-
-function Camera:update(dt)
-    -- todo update
+    
+    self:updateView(args.levelData)
 end
 
 function Camera:drawTilesToCanvas(canvas, levelData)
@@ -29,6 +28,7 @@ function Camera:drawTilesToCanvas(canvas, levelData)
     -- debugging, should not show this
     love.graphics.clear(1, 1, 0, 0)
 
+    local offset = self:getOffset()
     for x = self.center.x - self.width, self.center.x + self.width do
         for y = self.center.y - self.height, self.center.y + self.height do
             local didDraw = false
@@ -36,7 +36,7 @@ function Camera:drawTilesToCanvas(canvas, levelData)
             if row ~= nil then
                 local obj = row[x]
                 if obj ~= nil then
-                    local x_pos, y_pos = x * _TILE_SIZE, y * _TILE_SIZE
+                    local x_pos, y_pos = (x - offset.x) * _TILE_SIZE, (y - offset.y) * _TILE_SIZE
                     obj:draw(x_pos, y_pos)
                     didDraw = True
                 end
@@ -50,9 +50,11 @@ function Camera:drawTilesToCanvas(canvas, levelData)
     end
 end
 
-function Camera:update(levelData)
+function Camera:updateView(levelData)
     -- Always center on player
-    self.center = {x = levelData.character.x, y = levelData.character.y}
+    local newX = Math.clamp(levelData.character.x, self.width + 1, levelData.width - self.width)
+    local newY = Math.clamp(levelData.character.y, self.height + 1, levelData.height - self.height + 1)
+    self.center = {x = newX, y = newY}
 end
 
 function Camera:isInView(x, y)
@@ -64,10 +66,15 @@ function Camera:isInView(x, y)
     return true
 end
 
+function Camera:getOffset()
+    return {x=self.center.x-self.width-1, y=self.center.y-self.height-1}
+end
+
 function Camera:drawObjectsToCanvas(canvas, levelData)
+    local offset = self:getOffset()
     for _, obj in pairs(levelData:getObjects()) do
         if self:isInView(obj.x, obj.y) then
-            local x_pos, y_pos = obj.x * _TILE_SIZE, obj.y * _TILE_SIZE
+            local x_pos, y_pos = (obj.x - offset.x) * _TILE_SIZE, (obj.y - offset.y) * _TILE_SIZE
             obj:draw(x_pos, y_pos)
         end
     end

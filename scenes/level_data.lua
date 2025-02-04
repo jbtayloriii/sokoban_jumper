@@ -7,6 +7,8 @@ function LevelData:new(levelNumber)
     self.data = all_data["tiles"]
     self.character = all_data["character"]
     self.objects = all_data["objects"]
+    self.width = all_data["width"]
+    self.height = all_data["height"]
 end
 
 -- Loads a single tile for a level
@@ -73,6 +75,7 @@ function LevelData:LoadLevel(levelNumber)
   io.input(levelName)
   local text = io.read("*all")
 
+  local levelWidth = 1
   local tileData = {}
   local objects = {}
   local charTable = {}
@@ -84,11 +87,14 @@ function LevelData:LoadLevel(levelNumber)
         table.insert(levelRow, _parseLevelChar(c, objects, charTable, x, y))
         x = x + 1
       end
+      levelWidth = math.max(levelWidth, table.getn(levelRow))
       table.insert(tileData, levelRow)
       y = y + 1
   end
 
-  return {tiles=tileData, objects=objects, character = charTable["character"]}
+  levelHeight = table.getn(tileData)
+
+  return {tiles=tileData, objects=objects, character = charTable["character"], width=levelWidth, height=levelHeight}
 end
 
 function LevelData:getCell(x, y)
