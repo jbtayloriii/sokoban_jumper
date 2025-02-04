@@ -12,6 +12,10 @@ function LevelEntity:draw(x, y)
     love.graphics.draw(self.sprite, x, y)
 end
 
+function LevelEntity:canMoveHere()
+    return true
+end
+
 -- Useful for debugging issues
 function LevelEntity:drawDebug(x, y)
     local font = love.graphics.getFont()

@@ -12,6 +12,10 @@ function Wall:update(dt)
     -- todo update
 end
 
+function Wall:canMoveHere()
+    return false
+end
+
 -- function Wall:draw()
 --     -- todo draw
 -- end

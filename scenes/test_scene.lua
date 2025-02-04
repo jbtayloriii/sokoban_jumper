@@ -1,7 +1,7 @@
 TestScene = LevelScene:extend()
 
 function TestScene:new()
-  TestScene.super.new(self, "assets/levels/level_1.txt")
+  TestScene.super.new(self, 1)
 
 end
 

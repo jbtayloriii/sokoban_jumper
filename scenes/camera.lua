@@ -50,6 +50,11 @@ function Camera:drawTilesToCanvas(canvas, levelData)
     end
 end
 
+function Camera:update(levelData)
+    -- Always center on player
+    self.center = {x = levelData.character.x, y = levelData.character.y}
+end
+
 function Camera:isInView(x, y)
     if x < self.center.x - self.width or x > self.center.x + self.width then
         return false
