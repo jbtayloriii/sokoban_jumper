@@ -80,7 +80,7 @@ function LevelData:LoadLevel(levelNumber)
   local objects = {}
   local charTable = {}
   local y = 1
-  for line in text:gmatch("[^\n]+\n") do
+  for line in text:gmatch("[^\n]+") do
       local x = 1
       local levelRow = {}
       for c in line:gmatch("[^\n]") do
