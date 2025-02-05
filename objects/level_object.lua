@@ -1,4 +1,5 @@
 LevelEntity = require("objects/level_entity")
+Uuid = require("libraries/utils")
 
 LevelObject = LevelEntity:extend()
 
@@ -7,6 +8,7 @@ function LevelObject:new(sprite, x, y)
     self.sprite = sprite
     self.x = x or 0
     self.y = y or 0
+    self.uuid = Uuid:uuid()
 end
 
 function LevelObject:update(dt)

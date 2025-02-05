@@ -5,8 +5,11 @@ local _MAX_LEVEL_NUMBER = 1
 function LevelData:new(levelNumber)
     local all_data = self:LoadLevel(levelNumber)
     self.data = all_data["tiles"]
+
+    self.level_objects = LevelObjects(all_data["objects"])
     self.character = all_data["character"]
-    self.objects = all_data["objects"]
+    self.level_objects:_add(self.character)
+    
     self.width = all_data["width"]
     self.height = all_data["height"]
 end
@@ -46,7 +49,7 @@ function LevelData:handlePlayerInput(playerInputDirection)
   local newX = self.character.x + playerInputDirection.x
   local newY = self.character.y + playerInputDirection.y
 
-  if self:canMoveHere(newX, newY) then
+  if self:shouldObjectsMove(newX, newY) then
     self:moveObject(self.character, newX, newY)
   end
 
@@ -61,29 +64,23 @@ function LevelData:moveObject(obj, newX, newY)
     error("Moving object to same position at "..oldKey)
   end
 
-  if self.objects[oldKey] ~= obj then
-    error("got the wrong object at "..oldKey)
-  end
-
-  if self.objects[newKey] then
-    error("Expected no object at "..newKey)
-  end
-
-  self.objects[newKey] = obj
-  self.objects[oldKey] = nil
-  obj.x = newX
-  obj.y = newY
+  self.level_objects:move(obj, newX, newY)
 
 end
 
-function LevelData:canMoveHere(x, y)
+function LevelData:shouldObjectsMove(x, y)
+  -- todo: should check things like pushing or objects that impede movement
+  -- and handle accordingly
   local tile = self:getCell(x, y)
-  local obj = self:getObj(x, y)
-  if tile then
+  local objs = self.level_objects:getObjectsAt(x, y)
+
+  if not objs then
     return tile:canMoveHere()
-  else
-    return false
   end
+
+  print(x..","..y)
+  print(objs)
+  return false
 end
 
 function LevelData:LoadLevel(levelNumber)
@@ -129,16 +126,14 @@ function LevelData:getCell(x, y)
   end
 end
 
-function LevelData:getObj(x, y)
-
-end
-
 function LevelData:getRow(row)
   return self.data[row]
 end
 
+-- Returns a flat list of objects in the level
 function LevelData:getObjectsAndCharacter()
-  return self.objects
+  -- return {}
+  return self.level_objects:getObjects()
 end
 
 
