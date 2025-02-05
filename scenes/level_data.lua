@@ -16,23 +16,23 @@ end
 -- Returns the tile (floor, pit, wall)
 local function _parseLevelChar(c, objects, charTable, x, y)
     if c == "b" then
-      table.insert(objects, Bone(x, y))
+      objects[x..","..y] = Bone(x, y)
       return Floor()
     elseif c == "s" then
       local character = Character(x, y)
       charTable["character"] = character
-      table.insert(objects, character)
+      objects[x..","..y] = character
       return Floor()
     elseif c == "f" then
-      table.insert(objects, Fire(x, y))
+      objects[x..","..y] = Fire(x, y)
       return Floor()
     elseif c == "." then
       return Floor()
     elseif c == "m" then
-      table.insert(objects, MetalCrate(x, y))
+      objects[x..","..y] = MetalCrate(x, y)
       return Floor()
     elseif c == "w" then
-      table.insert(objects, WoodenCrate(x, y))
+      objects[x..","..y] = WoodenCrate(x, y)
       return Floor()
     elseif c == "x" then
       return Wall()
@@ -47,15 +47,38 @@ function LevelData:handlePlayerInput(playerInputDirection)
   local newY = self.character.y + playerInputDirection.y
 
   if self:canMoveHere(newX, newY) then
-    self.character.x = newX
-    self.character.y = newY
+    self:moveObject(self.character, newX, newY)
   end
 
   -- Otherwise play a sound?
 end
 
+function LevelData:moveObject(obj, newX, newY)
+  local oldKey = obj.x..","..obj.y
+  local newKey = newX..","..newY
+
+  if oldKey == newKey then
+    error("Moving object to same position at "..oldKey)
+  end
+
+  if self.objects[oldKey] ~= obj then
+    error("got the wrong object at "..oldKey)
+  end
+
+  if self.objects[newKey] then
+    error("Expected no object at "..newKey)
+  end
+
+  self.objects[newKey] = obj
+  self.objects[oldKey] = nil
+  obj.x = newX
+  obj.y = newY
+
+end
+
 function LevelData:canMoveHere(x, y)
   local tile = self:getCell(x, y)
+  local obj = self:getObj(x, y)
   if tile then
     return tile:canMoveHere()
   else
@@ -106,11 +129,15 @@ function LevelData:getCell(x, y)
   end
 end
 
+function LevelData:getObj(x, y)
+
+end
+
 function LevelData:getRow(row)
   return self.data[row]
 end
 
-function LevelData:getObjects()
+function LevelData:getObjectsAndCharacter()
   return self.objects
 end
 

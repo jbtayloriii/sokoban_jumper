@@ -72,7 +72,7 @@ end
 
 function Camera:drawObjectsToCanvas(canvas, levelData)
     local offset = self:getOffset()
-    for _, obj in pairs(levelData:getObjects()) do
+    for _, obj in pairs(levelData:getObjectsAndCharacter()) do
         if self:isInView(obj.x, obj.y) then
             local x_pos, y_pos = (obj.x - offset.x) * _TILE_SIZE, (obj.y - offset.y) * _TILE_SIZE
             obj:draw(x_pos, y_pos)
