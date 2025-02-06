@@ -80,32 +80,52 @@ function LevelData:moveObject(obj, newX, newY)
 end
 
 -- Returns a list of objects that should move, or nil if they cannot
-function LevelData:getObjectsToMove(character, newCharX, newCharY, direction)
+-- Recursively calls into itself for pushing blocks
+function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction)
   local tile = self:getCell(newCharX, newCharY)
   if not tile:canMoveHere() then return nil end
 
   -- For objects, first check we can move through them
   -- Pushable objects like wooden blocks are able to be moved through
   local objs = self.level_objects:getObjectsAt(newCharX, newCharY)
-  if not objs then return {character} end
+  if not objs then return {objMoving} end
 
   for _, obj in pairs(objs) do
     if not obj:canMoveThrough() then return nil end
   end
 
-  -- Then check if we need to push
+  -- Then check if we can/need to push
   for _, obj in pairs(objs) do
     if obj:canMovePush() then 
-      -- check that the object can be pushed
+      local objNewX = obj.x + direction.x
+      local objNewY = obj.y + direction.y
+      local pushedObjs = self:getObjectsToMove(obj, objNewX, objNewY, direction)
+
+      -- If we can't push the objects then we end
+      if not pushedObjs then return nil end
+
+      table.insert(pushedObjs, objMoving)
+
+      -- We're assuming there can only be one pushable block in a given cell,
+      -- which is why we return in the loop. This might backfire...
+      return pushedObjs
     end
   end
 
-  return {character}
+  return {objMoving}
 end
 
 function LevelData:canObjMoveHere(x, y)
   local tile = self:getCell(x, y)
-  return tile:canMoveHere()
+  if not tile:canMoveHere() then return false end
+
+  local objs = self.level_objects:getObjectsAt(newCharX, newCharY)
+  if not objs then return true end
+
+  for _, obj in pairs(objs) do
+    if not obj:canMoveThrough() then return nil end
+  end
+  return true
 end
 
 
