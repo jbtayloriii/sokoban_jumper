@@ -5,17 +5,11 @@ Wall = LevelEntity:extend()
 _WALL_SPRITE = love.graphics.newImage("assets/images/wall.png")
 
 function Wall:new()
-    Wall.super.new(self, _WALL_SPRITE)
-end
-
-function Wall:update(dt)
-    -- todo update
+    Wall.super.new(self, _WALL_SPRITE, "wall")
 end
 
 function Wall:canMoveHere()
     return false
 end
 
--- function Wall:draw()
---     -- todo draw
--- end
+return Wall

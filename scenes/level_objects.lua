@@ -23,25 +23,26 @@ function LevelObjects:_remove(obj)
     end
     self.object_pos[key][obj.uuid] = nil
 
-    -- Hack, return without deleting cell table if there are any others remaining
+    -- Return without deleting cell table if there are any others remaining
     for _ in pairs(self.object_pos[key]) do
         return
     end
+    self.object_pos[key] = nil
+    
 end
 
 function LevelObjects:move(obj, newX, newY)
     self:_remove(obj)
-    obj.x = newX
-    obj.y = newY
+    obj:moveTo(newX, newY)
     self:_add(obj)
 end
 
 function LevelObjects:getObjectsAt(x, y)
+    local key = x..","..y
     if not self.object_pos[key] then
         return nil
     end
 
-    local key = x..","..y
     local objs = {}
     for _, obj in pairs(self.object_pos[key]) do
         table.insert(objs, obj)

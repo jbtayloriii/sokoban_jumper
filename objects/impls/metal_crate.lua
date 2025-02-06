@@ -5,13 +5,11 @@ MetalCrate = LevelObject:extend()
 _METAL_CRATE_SPRITE = love.graphics.newImage("assets/images/metal_crate.png")
 
 function MetalCrate:new(x, y)
-    MetalCrate.super.new(self, _METAL_CRATE_SPRITE, x, y)
+    MetalCrate.super.new(self,  _METAL_CRATE_SPRITE, "metal_crate", x, y)
 end
 
-function MetalCrate:update(dt)
-    -- todo update
+function MetalCrate:canMoveThrough()
+    return false
 end
 
--- function MetalCrate:draw()
---     -- todo draw
--- end
+return MetalCrate

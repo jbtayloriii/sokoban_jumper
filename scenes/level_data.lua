@@ -46,14 +46,25 @@ local function _parseLevelChar(c, objects, charTable, x, y)
 end
 
 function LevelData:handlePlayerInput(playerInputDirection)
-  local newX = self.character.x + playerInputDirection.x
-  local newY = self.character.y + playerInputDirection.y
+  local newCharX = self.character.x + playerInputDirection.x
+  local newCharY = self.character.y + playerInputDirection.y
 
-  if self:shouldObjectsMove(newX, newY) then
-    self:moveObject(self.character, newX, newY)
+  local isZip = self.character:isZip(playerInputDirection.x, playerInputDirection.y)
+
+  -- TODO: handle player zipping instead of just moving
+
+  local moveableObjects = self:getObjectsToMove(self.character, newCharX, newCharY, playerInputDirection)
+  if moveableObjects then
+    for _, obj in pairs(moveableObjects) do
+      local newX = obj.x + playerInputDirection.x
+      local newY = obj.y + playerInputDirection.y
+      self:moveObject(obj, newX, newY)
+    end
+
+    -- todo: handle player landing
+  else
+    -- Otherwise play a sound for not being able to move?
   end
-
-  -- Otherwise play a sound?
 end
 
 function LevelData:moveObject(obj, newX, newY)
@@ -68,19 +79,40 @@ function LevelData:moveObject(obj, newX, newY)
 
 end
 
-function LevelData:shouldObjectsMove(x, y)
-  -- todo: should check things like pushing or objects that impede movement
-  -- and handle accordingly
-  local tile = self:getCell(x, y)
-  local objs = self.level_objects:getObjectsAt(x, y)
+-- Returns a list of objects that should move, or nil if they cannot
+function LevelData:getObjectsToMove(character, newCharX, newCharY, direction)
+  local tile = self:getCell(newCharX, newCharY)
+  if not tile:canMoveHere() then return nil end
 
-  if not objs then
-    return tile:canMoveHere()
+  -- For objects, first check we can move through them
+  -- Pushable objects like wooden blocks are able to be moved through
+  local objs = self.level_objects:getObjectsAt(newCharX, newCharY)
+  if not objs then return {character} end
+
+  for _, obj in pairs(objs) do
+    if not obj:canMoveThrough() then return nil end
   end
 
-  print(x..","..y)
-  print(objs)
-  return false
+  -- Then check if we need to push
+  for _, obj in pairs(objs) do
+    if obj:canMovePush() then 
+      -- check that the object can be pushed
+    end
+  end
+
+  return {character}
+end
+
+function LevelData:canObjMoveHere(x, y)
+  local tile = self:getCell(x, y)
+  return tile:canMoveHere()
+end
+
+
+function LevelData:_canPushHere(x, y)
+  local tile = self:getCell(x, y)
+  if not tile:canMoveHere() then return false end
+
 end
 
 function LevelData:LoadLevel(levelNumber)

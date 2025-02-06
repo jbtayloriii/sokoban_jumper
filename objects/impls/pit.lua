@@ -1,11 +1,11 @@
-Pit = Object:extend()
+LevelEntity = require("objects/level_entity")
+
+Pit = LevelEntity:extend()
+
+_PIT_SPRITE = love.graphics.newImage("assets/images/pit.png")
 
 function Pit:new()
-    -- todo new
-end
-
-function Pit:update(dt)
-    -- todo update
+    Pit.super.new(self, _PIT_SPRITE, "pit")
 end
 
 return Pit

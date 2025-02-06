@@ -3,30 +3,29 @@ Uuid = require("libraries/utils")
 
 LevelObject = LevelEntity:extend()
 
-function LevelObject:new(sprite, x, y)
-    LevelObject.super.new(self, sprite)
+function LevelObject:new(sprite, name, x, y)
+    LevelObject.super.new(self, sprite, name)
     self.sprite = sprite
     self.x = x or 0
     self.y = y or 0
     self.uuid = Uuid:uuid()
 end
 
-function LevelObject:update(dt)
-    -- todo update
+function LevelObject:isPushable()
+    return false
 end
 
--- function LevelObject:draw(x, y)
---     love.graphics.draw(self.sprite, x, y)
--- end
+function LevelObject:canMoveThrough()
+    return true
+end
 
--- -- Useful for debugging issues
--- function LevelObject:drawDebug(x, y)
---     local font = love.graphics.getFont()
+function LevelObject:canMovePush()
+    return false
+end
 
---     x_pos = x / 16
---     y_pos = y / 16
---     local text = love.graphics.newText(font, {{0,0,0},string.format("[%s,%s]", x_pos, y_pos)})
---     love.graphics.draw(text, x, y)
--- end
+function LevelObject:moveTo(x, y)
+    self.x = x
+    self.y = y
+end
 
 return LevelObject

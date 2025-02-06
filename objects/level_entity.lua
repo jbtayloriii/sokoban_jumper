@@ -1,7 +1,8 @@
 LevelEntity = Object:extend()
 
-function LevelEntity:new(sprite)
+function LevelEntity:new(sprite, name)
     self.sprite = sprite
+    self.name = name
 end
 
 function LevelEntity:update(dt)
