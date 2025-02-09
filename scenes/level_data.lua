@@ -39,6 +39,9 @@ local function _parseLevelChar(c, objects, charTable, x, y)
       return Floor()
     elseif c == "x" then
       return Wall()
+    elseif c == "e" then
+      objects[x..","..y] = Exit(x, y)
+      return Floor()
     end
   
     print("hit bad spot loading level data: "..c)
