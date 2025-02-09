@@ -53,11 +53,23 @@ function LevelData:handlePlayerInput(playerInputDirection)
 
   -- TODO: handle player zipping instead of just moving
 
-  local moveableObjects = self:getObjectsToMove(self.character, newCharX, newCharY, playerInputDirection)
+  if isZip then
+    self:zipMove(playerInputDirection)
+  else
+    self:regularMove(playerInputDirection, newCharX, newCharY)
+  end
+end
+
+function LevelData:zipMove(inputDirection)
+
+end
+
+function LevelData:regularMove(inputDirection, newCharX, newCharY)
+  local moveableObjects = self:getObjectsToMove(self.character, newCharX, newCharY, inputDirection)
   if moveableObjects then
     for _, obj in pairs(moveableObjects) do
-      local newX = obj.x + playerInputDirection.x
-      local newY = obj.y + playerInputDirection.y
+      local newX = obj.x + inputDirection.x
+      local newY = obj.y + inputDirection.y
       self:moveObject(obj, newX, newY)
     end
 

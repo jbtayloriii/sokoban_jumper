@@ -4,10 +4,24 @@ Character = LevelObject:extend()
 
 _CHARACTER_SPRITE = love.graphics.newImage("assets/images/character.png")
 
+_CHARACTER_POWERING_UP_SHEET = love.graphics.newImage
+
 function Character:new(x, y)
     Character.super.new(self, _CHARACTER_SPRITE, "character", x, y)
 
     self.moves = {}
+end
+
+function Character:draw(x, y)
+
+    -- Draw flames under self if we are about to zip
+    if table.getn(self.moves) == 2 and self.moves[1] == self.moves[2] then
+        love.graphics.setColor(.5, .5, 0)
+        love.graphics.rectangle("fill", x + 1, y + 1, 14, 14)
+        love.graphics.setColor(1, 1, 1)
+    end
+
+    Character.super.draw(self, x, y)
 end
 
 
