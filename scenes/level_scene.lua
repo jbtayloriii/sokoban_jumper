@@ -24,6 +24,9 @@ function LevelScene:bindInput()
   self.input:bind("left", "left")
   self.input:bind("right", "right")
 
+  -- Player special move
+  self.input:bind("a", "zip")
+
   -- Undo, reset
   self.input:bind("z", "undo")
   self.input:bind("r", "reset")
@@ -43,6 +46,11 @@ function LevelScene:update(dt)
   if self.input:pressed("loadPrev") then
   end
 
+  if self.input:pressed("zip") then
+    self.levelData:handlePlayerZip()
+    self.camera:updateView(self.levelData)
+  end
+
   local playerInput = nil
   if self.input:pressed("up") then
     playerInput = {x=0, y=-1}
@@ -55,21 +63,25 @@ function LevelScene:update(dt)
   end
   
   if playerInput then
-    self.levelData:handlePlayerInput(playerInput)
+    self.levelData:handlePlayerMove(playerInput)
     self.camera:updateView(self.levelData)
   end
 end
 
 function LevelScene:draw()
+  -- Draw level onto canvas
   local canvas = love.graphics.newCanvas()
   love.graphics.clear()
   love.graphics.setCanvas(canvas)
-
   self.camera:drawTilesToCanvas(canvas, self.levelData)
   self.camera:drawObjectsToCanvas(canvas, self.levelData)
   love.graphics.setCanvas()
 
-  love.graphics.draw(canvas,0,0,0,2)
+  -- Draw level canvas to the screen
+  love.graphics.draw(canvas, 16, 16, 0, 2)
+
+  -- Draw level title
+  love.graphics.print(self.levelData.metadata.title)
 end
 
 return LevelScene

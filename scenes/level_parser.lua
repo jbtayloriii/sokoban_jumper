@@ -13,7 +13,7 @@ function LevelParser.loadLevel(levelNumber)
   io.input(levelName)
   local text = io.read("*all")
 
-  levelIterator = string.gmatch(text, "[^-]+---")
+  levelIterator = text:gmatch( "([^-]+)---")
 
   local levelMetadata = LevelParser._parseMetadata(levelIterator())
 
@@ -36,11 +36,21 @@ function LevelParser.loadLevel(levelNumber)
 
   levelHeight = table.getn(tileData)
 
-  return {tiles=tileData, objects=objects, character = charTable["character"], width=levelWidth, height=levelHeight}
+  return {
+    tiles=tileData,
+    objects=objects,
+    character = charTable["character"],
+    width=levelWidth,
+    height=levelHeight,
+    metadata=levelMetadata,
+  }
 end
 
 function LevelParser._parseMetadata(metadata_text)
-    -- error(metadata_text)
+  local title = metadata_text:gmatch("([^\n]+)")()
+  return {
+    title=title
+  }
 end
 
 -- Loads a single tile for a level

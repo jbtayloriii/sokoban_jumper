@@ -18,4 +18,4 @@ x.w...xxx
 x...b.x
 x.....x
 xxxxxxx
----END
+---

@@ -4,38 +4,26 @@ LevelParser = require("scenes/level_parser")
 LevelData = Object:extend()
 
 function LevelData:new(levelNumber)
-    local all_data = LevelParser.loadLevel(levelNumber)
-    self.data = all_data["tiles"]
+  local loadedData = LevelParser.loadLevel(levelNumber)
+  self.data = loadedData["tiles"]
 
-    self.level_objects = LevelObjects(all_data["objects"])
-    self.character = all_data["character"]
-    self.level_objects:_add(self.character)
-    
-    self.width = all_data["width"]
-    self.height = all_data["height"]
+  self.level_objects = LevelObjects(loadedData["objects"])
+  self.character = loadedData["character"]
+  self.level_objects:_add(self.character)
+  
+  self.width = loadedData["width"]
+  self.height = loadedData["height"]
+  self.metadata = loadedData["metadata"]
 end
 
-
-function LevelData:handlePlayerInput(playerInputDirection)
-  local newCharX = self.character.x + playerInputDirection.x
-  local newCharY = self.character.y + playerInputDirection.y
-
-  local isZip = self.character:isZip(playerInputDirection.x, playerInputDirection.y)
-
-  -- TODO: handle player zipping instead of just moving
-
-  if isZip then
-    self:zipMove(playerInputDirection)
-  else
-    self:regularMove(playerInputDirection, newCharX, newCharY)
-  end
+function LevelData:handlePlayerZip()
+  -- todo
 end
 
-function LevelData:zipMove(inputDirection)
+function LevelData:handlePlayerMove(inputDirection)
+  local newCharX = self.character.x + inputDirection.x
+  local newCharY = self.character.y + inputDirection.y
 
-end
-
-function LevelData:regularMove(inputDirection, newCharX, newCharY)
   local moveableObjects = self:getObjectsToMove(self.character, newCharX, newCharY, inputDirection)
   if moveableObjects then
     for _, obj in pairs(moveableObjects) do
