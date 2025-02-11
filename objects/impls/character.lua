@@ -6,6 +6,9 @@ _CHARACTER_SPRITE = love.graphics.newImage("assets/images/character.png")
 
 _CHARACTER_POWERING_UP_SHEET = love.graphics.newImage
 
+-- Number of moves before zip is active
+_ZIP_COUNT = 3
+
 function Character:new(x, y)
     Character.super.new(self, _CHARACTER_SPRITE, "character", x, y)
 
@@ -13,9 +16,10 @@ function Character:new(x, y)
 end
 
 function Character:draw(x, y)
+    -- Draw aura under self if we are about to zip
+    if self:zipActive() then
 
-    -- Draw flames under self if we are about to zip
-    if table.getn(self.moves) == 2 and self.moves[1] == self.moves[2] then
+        -- todo: make this look good
         love.graphics.setColor(.5, .5, 0)
         love.graphics.rectangle("fill", x + 1, y + 1, 14, 14)
         love.graphics.setColor(1, 1, 1)
@@ -24,18 +28,20 @@ function Character:draw(x, y)
     Character.super.draw(self, x, y)
 end
 
-
-function Character:isZip(x, y)
-    if table.getn(self.moves) < 2 then
+function Character:zipActive()
+    if table.getn(self.moves) < _ZIP_COUNT then
         return false
     end
 
-    local key = x..","..y
-    for _, k in ipairs(self.moves) do
-        if k ~= key then
+    last_move = nil
+    for _, move in ipairs(self.moves) do
+        if last_move == nil then
+            last_move = move
+        elseif last_move ~= move then
             return false
         end
     end
+
     return true
 end
 
@@ -47,7 +53,7 @@ function Character:moveTo(x, y)
     Character.super.moveTo(self, x, y)
 
     table.insert(self.moves, key)
-    if table.getn(self.moves) > 2 then
+    if table.getn(self.moves) > _ZIP_COUNT then
         table.remove(self.moves, 1)
     end
 end

@@ -5,7 +5,7 @@ WoodenCrate = LevelObject:extend()
 _WOODEN_CRATE_SPRITE = love.graphics.newImage("assets/images/wooden_crate.png")
 
 function WoodenCrate:new(x, y)
-    WoodenCrate.super.new(self, _WOODEN_CRATE_SPRITE, "wooden_create", x, y)
+    WoodenCrate.super.new(self, _WOODEN_CRATE_SPRITE, "wooden_crate", x, y)
 end
 
 function WoodenCrate:canMovePush()

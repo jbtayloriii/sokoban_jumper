@@ -1,13 +1,13 @@
 First Level
 ---
-xxxxxxx
-x.....x
-x.s...x
-x...b.xx
-x......xx
-xxx.xx..xxxxxxxxxxx
+xxxxxxxxxxxxx
+x...........x
+x.s...m.....x
+x...b......mx
+x......xx...x
+xxx.xx..x...xxxxxxx
 xxx.xxx...........x
-x.....x........e..x
+x.....x....m...e..x
 x.m.....ww........x
 x...b.x........e..x
 x.....x...........x

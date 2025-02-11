@@ -31,20 +31,22 @@ function Camera:drawTilesToCanvas(canvas, levelData)
     local offset = self:getOffset()
     for x = self.center.x - self.width, self.center.x + self.width do
         for y = self.center.y - self.height, self.center.y + self.height do
+            local x_pos, y_pos = (x - offset.x) * _TILE_SIZE, (y - offset.y) * _TILE_SIZE
             local didDraw = false
             local row = levelData:getRow(y)
             if row ~= nil then
                 local obj = row[x]
                 if obj ~= nil then
-                    local x_pos, y_pos = (x - offset.x) * _TILE_SIZE, (y - offset.y) * _TILE_SIZE
                     obj:draw(x_pos, y_pos)
-                    didDraw = True
+                    didDraw = true
                 end
             end
 
             if not didDraw then
                 -- Draw OOB
-                -- love.graphics.polygon("fill")
+                love.graphics.setColor(.1, .1, .1)
+                love.graphics.rectangle("fill", x_pos + 1, y_pos + 1, 14, 14)
+                love.graphics.setColor(1, 1, 1)
             end
         end
     end

@@ -49,6 +49,7 @@ function LevelScene:update(dt)
   if self.input:pressed("zip") then
     self.levelData:handlePlayerZip()
     self.camera:updateView(self.levelData)
+    return
   end
 
   local playerInput = nil

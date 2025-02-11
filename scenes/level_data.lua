@@ -17,7 +17,80 @@ function LevelData:new(levelNumber)
 end
 
 function LevelData:handlePlayerZip()
-  -- todo
+  if not self.character:zipActive() then
+    return nil
+  end
+
+  -- Parse zip direction
+  local playerDirection = self.character.moves[1]
+
+  local xMove, yMove
+  local woodenCrates = {}
+  for x, y in string.gmatch(playerDirection, "(-?%d),(-?%d)") do
+    xMove = x
+    yMove = y
+    break
+  end
+
+  -- Figure out spaces until we hit a wall or metal crate
+  local canMove = true
+  local metalCrate = nil
+  local objects = {}
+  nextLocation = {x = self.character.x, y = self.character.y}
+  print("Zipping character at "..self.character.x..","..self.character.y)
+  print("Direction: "..xMove..","..yMove)
+  while canMove do
+    nextLocation = {x = nextLocation.x + xMove, y = nextLocation.y + yMove}
+
+    print(nextLocation.x..","..nextLocation.y)
+    local tile = self:getTile(nextLocation.x, nextLocation.y)
+    if not tile or not tile:canMoveHere() then
+      print("bad tile")
+      canMove = false
+    end
+
+    local objs = self.level_objects:getObjectsAt(nextLocation.x, nextLocation.y)
+    if objs then
+      for _, obj in ipairs(objs) do
+        if obj.name == "wooden_crate" then
+          table.insert(woodenCrates, obj)
+        end
+  
+        if obj.name == "metal_crate" then
+          canMove = false
+          metalCrate = obj
+          print("found metal crate")
+        else
+          print(obj.name)
+        end
+      end
+    end
+
+    -- canMove = false
+  end
+  print("wooden_crates: "..table.getn(woodenCrates))
+
+  -- nextLocation now has the location of either a metal crate or a wall
+  local xDiff = nextLocation.x - self.character.x
+  local yDiff = nextLocation.y - self.character.y
+
+  -- Walk back nextLocation and place wooden crates, then the player
+  -- Wooden crates might get shifted around, we are assuming individuality doesn't matter
+  nextLocation.x = nextLocation.x - xMove
+  nextLocation.y = nextLocation.y - yMove
+
+  for _, crate in ipairs(woodenCrates) do
+    self:moveObject(crate, nextLocation.x, nextLocation.y)
+    nextLocation.x = nextLocation.x - xMove
+    nextLocation.y = nextLocation.y - yMove
+  end
+
+  self:moveObject(self.character, nextLocation.x, nextLocation.y)
+  -- print(xDiff)
+  -- print(yDiff)
+
+  -- todo: handle pushing metal crate here
+
 end
 
 function LevelData:handlePlayerMove(inputDirection)
@@ -32,7 +105,10 @@ function LevelData:handlePlayerMove(inputDirection)
       self:moveObject(obj, newX, newY)
     end
 
-    -- todo: handle player landing
+    -- Handle objects on top of each other now
+    for _, obj in pairs(moveableObjects) do
+      -- Todo: handle objects on top of each other now
+    end
   else
     -- Otherwise play a sound for not being able to move?
   end
@@ -42,10 +118,6 @@ function LevelData:moveObject(obj, newX, newY)
   local oldKey = obj.x..","..obj.y
   local newKey = newX..","..newY
 
-  if oldKey == newKey then
-    error("Moving object to same position at "..oldKey)
-  end
-
   self.level_objects:move(obj, newX, newY)
 
 end
@@ -53,7 +125,7 @@ end
 -- Returns a list of objects that should move, or nil if they cannot
 -- Recursively calls into itself for pushing blocks
 function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction)
-  local tile = self:getCell(newCharX, newCharY)
+  local tile = self:getTile(newCharX, newCharY)
   if not tile:canMoveHere() then return nil end
 
   -- For objects, first check we can move through them
@@ -65,7 +137,7 @@ function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction)
     if not obj:canMoveThrough() then return nil end
   end
 
-  -- Then check if we can/need to push
+  -- Then recursively check if we can/need to push
   for _, obj in pairs(objs) do
     if obj:canMovePush() then 
       local objNewX = obj.x + direction.x
@@ -87,7 +159,7 @@ function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction)
 end
 
 function LevelData:canObjMoveHere(x, y)
-  local tile = self:getCell(x, y)
+  local tile = self:getTile(x, y)
   if not tile:canMoveHere() then return false end
 
   local objs = self.level_objects:getObjectsAt(newCharX, newCharY)
@@ -100,13 +172,7 @@ function LevelData:canObjMoveHere(x, y)
 end
 
 
-function LevelData:_canPushHere(x, y)
-  local tile = self:getCell(x, y)
-  if not tile:canMoveHere() then return false end
-
-end
-
-function LevelData:getCell(x, y)
+function LevelData:getTile(x, y)
   local row = self:getRow(y)
   if row then
     return row[x]
