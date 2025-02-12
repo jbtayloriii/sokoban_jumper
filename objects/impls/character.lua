@@ -11,7 +11,6 @@ _ZIP_COUNT = 3
 
 function Character:new(x, y)
     Character.super.new(self, _CHARACTER_SPRITE, "character", x, y)
-
     self.moves = {}
 end
 

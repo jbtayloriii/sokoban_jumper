@@ -46,27 +46,28 @@ function LevelScene:update(dt)
   if self.input:pressed("loadPrev") then
   end
 
+  -- todo: remove this
   if self.input:pressed("zip") then
-    self.levelData:handlePlayerZip()
-    self.camera:updateView(self.levelData)
-    return
+    self.levelData:StartZip()
+  else
+    local playerInput = nil
+    if self.input:pressed("up") then
+      playerInput = {x=0, y=-1}
+    elseif self.input:pressed("down") then
+      playerInput = {x=0, y=1}
+    elseif self.input:pressed("left") then
+      playerInput = {x=-1, y=-0}
+    elseif self.input:pressed("right") then
+      playerInput = {x=1, y=0}
+    end
+    if playerInput then
+      self.levelData:handlePlayerMove(playerInput)
+    end
   end
+  self.levelData:update(dt)
 
-  local playerInput = nil
-  if self.input:pressed("up") then
-    playerInput = {x=0, y=-1}
-  elseif self.input:pressed("down") then
-    playerInput = {x=0, y=1}
-  elseif self.input:pressed("left") then
-    playerInput = {x=-1, y=-0}
-  elseif self.input:pressed("right") then
-    playerInput = {x=1, y=0}
-  end
-  
-  if playerInput then
-    self.levelData:handlePlayerMove(playerInput)
-    self.camera:updateView(self.levelData)
-  end
+  -- Camera should be the last thing to update, to prevent tear
+  self.camera:updateView(self.levelData)
 end
 
 function LevelScene:draw()

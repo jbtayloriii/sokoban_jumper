@@ -16,6 +16,16 @@ function LevelData:new(levelNumber)
   self.metadata = loadedData["metadata"]
 end
 
+-- Puts a player in zip mode
+function LevelData:StartZip()
+  if not self.character:zipActive() then
+    return
+  end
+
+  self.isZipping = true
+  self.zipTimer = 0
+end
+
 function LevelData:handlePlayerZip()
   if not self.character:zipActive() then
     return nil
@@ -86,18 +96,62 @@ function LevelData:handlePlayerZip()
   end
 
   self:moveObject(self.character, nextLocation.x, nextLocation.y)
-  -- print(xDiff)
-  -- print(yDiff)
 
   -- todo: handle pushing metal crate here
 
 end
 
+function LevelData:update(dt)
+  if not self.isZipping then
+    return
+  end
+
+  -- Decrement zip timer
+  self.zipTimer = self.zipTimer - dt
+  if self.zipTimer > 0 then
+    return
+  end
+
+  -- handle zip movement and reset timer
+
+  -- Parse zip direction
+  local playerDirection = self.character.moves[1]
+
+  local xMove, yMove
+  local woodenCrates = {}
+  for x, y in string.gmatch(playerDirection, "(-?%d),(-?%d)") do
+    xMove = x
+    yMove = y
+    break
+  end
+
+  local inputDirection = {x = xMove, y = yMove}
+  local didMove = self:tryMoveCharacter(inputDirection, true)
+
+  -- todo: handle false more?
+  if not didMove then
+    self.isZipping = false
+  end
+
+  self.zipTimer = 1/60
+end
+
 function LevelData:handlePlayerMove(inputDirection)
+  if self.isZipping then
+    return
+  end
+
+  local didMove = self:tryMoveCharacter(inputDirection, false)
+
+  -- todo: play bump sound if we cannot move?
+end
+
+
+function LevelData:tryMoveCharacter(inputDirection, isZipping)
   local newCharX = self.character.x + inputDirection.x
   local newCharY = self.character.y + inputDirection.y
 
-  local moveableObjects = self:getObjectsToMove(self.character, newCharX, newCharY, inputDirection)
+  local moveableObjects = self:getObjectsToMove(self.character, newCharX, newCharY, inputDirection, isZipping)
   if moveableObjects then
     for _, obj in pairs(moveableObjects) do
       local newX = obj.x + inputDirection.x
@@ -109,8 +163,9 @@ function LevelData:handlePlayerMove(inputDirection)
     for _, obj in pairs(moveableObjects) do
       -- Todo: handle objects on top of each other now
     end
+    return true
   else
-    -- Otherwise play a sound for not being able to move?
+    return false
   end
 end
 
@@ -124,7 +179,7 @@ end
 
 -- Returns a list of objects that should move, or nil if they cannot
 -- Recursively calls into itself for pushing blocks
-function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction)
+function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction, isZipping)
   local tile = self:getTile(newCharX, newCharY)
   if not tile:canMoveHere() then return nil end
 
@@ -158,26 +213,11 @@ function LevelData:getObjectsToMove(objMoving, newCharX, newCharY, direction)
   return {objMoving}
 end
 
-function LevelData:canObjMoveHere(x, y)
-  local tile = self:getTile(x, y)
-  if not tile:canMoveHere() then return false end
-
-  local objs = self.level_objects:getObjectsAt(newCharX, newCharY)
-  if not objs then return true end
-
-  for _, obj in pairs(objs) do
-    if not obj:canMoveThrough() then return nil end
-  end
-  return true
-end
-
 
 function LevelData:getTile(x, y)
   local row = self:getRow(y)
   if row then
     return row[x]
-  else
-    return nil
   end
 end
 
@@ -187,7 +227,6 @@ end
 
 -- Returns a flat list of objects in the level
 function LevelData:getObjectsAndCharacter()
-  -- return {}
   return self.level_objects:getObjects()
 end
 
