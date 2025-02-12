@@ -8,11 +8,15 @@ function LevelScene:new(level)
 
   self.level = level
 
-  self.levelData = LevelData(level)
   self:bindInput()
 
+  self:resetLevel()
+end
+
+function LevelScene:resetLevel()
+  print("Loading level "..self.level)
+  self.levelData = LevelData(self.level)
   self.camera = Camera{width=_CAMERA_SIZE, height=_CAMERA_SIZE, levelData=self.levelData}
-  self.main_canvas = love.graphics.newCanvas(gw, gh)
 end
 
 function LevelScene:bindInput()
@@ -43,6 +47,11 @@ function LevelScene:update(dt)
     love.event.quit()
   end
 
+  if self.input:pressed("reset") then
+    self:resetLevel()
+    return
+  end
+
   if self.input:pressed("loadPrev") then
   end
 
@@ -65,6 +74,12 @@ function LevelScene:update(dt)
     end
   end
   self.levelData:update(dt)
+
+  local loadNext = self.levelData:handleState()
+  if loadNext then
+    self.level = self.level + 1
+    self:resetLevel()
+  end
 
   -- Camera should be the last thing to update, to prevent tear
   self.camera:updateView(self.levelData)

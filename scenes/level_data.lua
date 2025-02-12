@@ -1,10 +1,10 @@
 
-LevelParser = require("scenes/level_parser")
+LevelLoader = require("scenes/level_loader")
 
 LevelData = Object:extend()
 
 function LevelData:new(levelNumber)
-  local loadedData = LevelParser.loadLevel(levelNumber)
+  local loadedData = LevelLoader.loadLevel(levelNumber)
   self.data = loadedData["tiles"]
 
   self.level_objects = LevelObjects(loadedData["objects"])
@@ -26,79 +26,20 @@ function LevelData:StartZip()
   self.zipTimer = 0
 end
 
-function LevelData:handlePlayerZip()
-  if not self.character:zipActive() then
-    return nil
-  end
+-- Handles checking state at the end of some action
+-- Returns: true if the next level should be loaded, false otherwise
+function LevelData:handleState()
 
-  -- Parse zip direction
-  local playerDirection = self.character.moves[1]
+  local objs = self.level_objects:getObjectsAt(self.character.x, self.character.y)
+  if not objs then return false end
 
-  local xMove, yMove
-  local woodenCrates = {}
-  for x, y in string.gmatch(playerDirection, "(-?%d),(-?%d)") do
-    xMove = x
-    yMove = y
-    break
-  end
-
-  -- Figure out spaces until we hit a wall or metal crate
-  local canMove = true
-  local metalCrate = nil
-  local objects = {}
-  nextLocation = {x = self.character.x, y = self.character.y}
-  print("Zipping character at "..self.character.x..","..self.character.y)
-  print("Direction: "..xMove..","..yMove)
-  while canMove do
-    nextLocation = {x = nextLocation.x + xMove, y = nextLocation.y + yMove}
-
-    print(nextLocation.x..","..nextLocation.y)
-    local tile = self:getTile(nextLocation.x, nextLocation.y)
-    if not tile or not tile:canMoveHere() then
-      print("bad tile")
-      canMove = false
+  for _, obj in ipairs(objs) do
+    if obj.name == "exit" then
+      return true
     end
-
-    local objs = self.level_objects:getObjectsAt(nextLocation.x, nextLocation.y)
-    if objs then
-      for _, obj in ipairs(objs) do
-        if obj.name == "wooden_crate" then
-          table.insert(woodenCrates, obj)
-        end
-  
-        if obj.name == "metal_crate" then
-          canMove = false
-          metalCrate = obj
-          print("found metal crate")
-        else
-          print(obj.name)
-        end
-      end
-    end
-
-    -- canMove = false
-  end
-  print("wooden_crates: "..table.getn(woodenCrates))
-
-  -- nextLocation now has the location of either a metal crate or a wall
-  local xDiff = nextLocation.x - self.character.x
-  local yDiff = nextLocation.y - self.character.y
-
-  -- Walk back nextLocation and place wooden crates, then the player
-  -- Wooden crates might get shifted around, we are assuming individuality doesn't matter
-  nextLocation.x = nextLocation.x - xMove
-  nextLocation.y = nextLocation.y - yMove
-
-  for _, crate in ipairs(woodenCrates) do
-    self:moveObject(crate, nextLocation.x, nextLocation.y)
-    nextLocation.x = nextLocation.x - xMove
-    nextLocation.y = nextLocation.y - yMove
   end
 
-  self:moveObject(self.character, nextLocation.x, nextLocation.y)
-
-  -- todo: handle pushing metal crate here
-
+  return false
 end
 
 function LevelData:update(dt)

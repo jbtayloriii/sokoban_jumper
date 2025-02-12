@@ -1,6 +1,6 @@
 local LevelParser = {}
 
-local _MAX_LEVEL_NUMBER = 1
+local _MAX_LEVEL_NUMBER = 2
 
 function LevelParser.loadLevel(levelNumber)
   if levelNumber < 1 then
@@ -9,6 +9,7 @@ function LevelParser.loadLevel(levelNumber)
     levelNumber = 1
   end
   local levelName = "assets/levels/level_"..levelNumber..".txt"
+  print("Loader loading level at:"..levelName)
 
   io.input(levelName)
   local text = io.read("*all")

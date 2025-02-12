@@ -53,7 +53,6 @@ function Camera:drawTilesToCanvas(canvas, levelData)
 end
 
 function Camera:updateView(levelData)
-    print("Updating camera view")
     -- Always center on player
     local newX = Math.clamp(levelData.character.x, self.width + 1, levelData.width - self.width)
     local newY = Math.clamp(levelData.character.y, self.height + 1, levelData.height - self.height + 1)
